@@ -1,0 +1,27 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start NestJS Backend",
+      "type": "shell",
+      "command": "npm run start:dev",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"],
+      "options": {
+        "cwd": "${workspaceFolder}/apps/backend"
+      }
+    },
+    {
+      "label": "Start Next.js Frontend",
+      "type": "shell",
+      "command": "npm run dev",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"],
+      "options": {
+        "cwd": "${workspaceFolder}/apps/frontend"
+      }
+    }
+  ]
+}

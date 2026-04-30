@@ -1,0 +1,81 @@
+import { AccountAnalyticsService } from './account-analytics.service';
+import { ServiceType } from '@prisma/client';
+export declare class AccountAnalyticsController {
+    private readonly analyticsService;
+    constructor(analyticsService: AccountAnalyticsService);
+    getAll(req: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        organizationId: string;
+        metrics: import("@prisma/client/runtime/client").JsonValue | null;
+        platform: import("@prisma/client").$Enums.ServiceType;
+        followersCount: number;
+        followingCount: number;
+        postsCount: number;
+        engagementRate: number;
+        responseRate: number;
+        bestPostingTimes: import("@prisma/client/runtime/client").JsonValue | null;
+        hashtagStrategy: import("@prisma/client/runtime/client").JsonValue | null;
+        contentSuggestions: import("@prisma/client/runtime/client").JsonValue | null;
+        snapshotDate: Date;
+    }[]>;
+    getDashboard(req: any): Promise<{
+        platform: import("@prisma/client").$Enums.ServiceType;
+        followersCount: number;
+        engagementRate: number;
+        responseRate: number;
+        postsCount: number;
+    }[]>;
+    getByPlatform(req: any, platform: ServiceType): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        organizationId: string;
+        metrics: import("@prisma/client/runtime/client").JsonValue | null;
+        platform: import("@prisma/client").$Enums.ServiceType;
+        followersCount: number;
+        followingCount: number;
+        postsCount: number;
+        engagementRate: number;
+        responseRate: number;
+        bestPostingTimes: import("@prisma/client/runtime/client").JsonValue | null;
+        hashtagStrategy: import("@prisma/client/runtime/client").JsonValue | null;
+        contentSuggestions: import("@prisma/client/runtime/client").JsonValue | null;
+        snapshotDate: Date;
+    }[]>;
+    getLatest(req: any, platform: ServiceType): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        organizationId: string;
+        metrics: import("@prisma/client/runtime/client").JsonValue | null;
+        platform: import("@prisma/client").$Enums.ServiceType;
+        followersCount: number;
+        followingCount: number;
+        postsCount: number;
+        engagementRate: number;
+        responseRate: number;
+        bestPostingTimes: import("@prisma/client/runtime/client").JsonValue | null;
+        hashtagStrategy: import("@prisma/client/runtime/client").JsonValue | null;
+        contentSuggestions: import("@prisma/client/runtime/client").JsonValue | null;
+        snapshotDate: Date;
+    } | null>;
+    capture(req: any, platform: ServiceType): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        organizationId: string;
+        metrics: import("@prisma/client/runtime/client").JsonValue | null;
+        platform: import("@prisma/client").$Enums.ServiceType;
+        followersCount: number;
+        followingCount: number;
+        postsCount: number;
+        engagementRate: number;
+        responseRate: number;
+        bestPostingTimes: import("@prisma/client/runtime/client").JsonValue | null;
+        hashtagStrategy: import("@prisma/client/runtime/client").JsonValue | null;
+        contentSuggestions: import("@prisma/client/runtime/client").JsonValue | null;
+        snapshotDate: Date;
+    }>;
+}

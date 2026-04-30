@@ -1,0 +1,491 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum IntegrationType {
+  WHATSAPP
+  INSTAGRAM
+  FACEBOOK
+  TWITTER
+  EMAIL
+  SMS
+  SHOPIFY
+  WOOCOMMERCE
+  STRIPE
+  RAZORPAY
+  GOOGLE_SHEETS
+  ZAPIER
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  DISCONNECTED
+  ERROR
+  PENDING
+}
+
+enum PlanTier {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum MessageChannel {
+  WHATSAPP
+  INSTAGRAM
+  FACEBOOK
+  TWITTER
+  EMAIL
+  SMS
+  CHATBOT
+  COMMUNITY
+}
+
+enum ServiceType {
+  INSTAGRAM
+  TWITTER
+  FACEBOOK
+  WHATSAPP
+  EMAIL
+  SMS
+  AI_CHATBOT
+}
+
+enum AutomationRuleType {
+  // Instagram
+  AUTO_DM_REPLY
+  AUTO_COMMENT_REPLY
+  AUTO_FOLLOW_REPLY
+  AUTO_POST_CONTENT
+  AUTO_REELS_POSTING
+  AUTO_CAROUSEL_POSTING
+  TRENDING_HASHTAG_GENERATOR
+  FOLLOWER_GROWTH_MONITOR
+  // Twitter
+  TWEET_SCHEDULE
+  AUTO_MENTION_REPLY
+  TRENDING_DETECT
+  ENGAGEMENT_MONITOR
+  // Facebook
+  FB_POST_AUTOMATION
+  FB_COMMENT_MODERATION
+  FB_MESSENGER_CHATBOT
+  FB_LEAD_GENERATION
+  // WhatsApp
+  WA_CHATBOT_REPLY
+  WA_APPOINTMENT_BOOKING
+  WA_CUSTOMER_SUPPORT
+  WA_SALES_ASSISTANT
+  // Email
+  EMAIL_AUTO_REPLY
+  EMAIL_CAMPAIGN_SCHEDULE
+  // SMS
+  SMS_AUTO_REPLY
+  SMS_CAMPAIGN_SCHEDULE
+}
+
+enum AIAgentStatus {
+  ACTIVE
+  PAUSED
+  LEARNING
+  ERROR
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
+model Organization {
+  id             String         @id @default(uuid())
+  name           String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  users          User[]
+  subscriptions  Subscription?
+  contacts       Contact[]
+  campaigns      Campaign[]
+  messages       Message[]
+  apiKeys        ApiKey[]
+  templates      Template[]
+  auditLogs      AuditLog[]
+  integrations   Integration[]
+  notifications  Notification[]
+  segments       Segment[]
+  onboardingStep Int            @default(1) // 1 to 5 mapping to the wizard steps
+  mediaAssets    MediaAsset[]
+  socialPosts    SocialPost[]
+  serviceSubscriptions ServiceSubscription[]
+  trialSubscriptions   TrialSubscription[]
+  connectedAccounts    ConnectedAccount[]
+  automationRules      AutomationRule[]
+  aiAgents             AIAgent[]
+  accountAnalytics     AccountAnalytics[]
+  platformSubscriptions PlatformSubscription[]
+}
+
+model User {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  passwordHash   String
+  name           String?
+  role           Role           @default(MEMBER)
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  assignedMsgs   Message[]      @relation("MessageAssignee")
+}
+
+model Subscription {
+  id               String       @id @default(uuid())
+  organizationId   String       @unique
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  plan             PlanTier     @default(FREE)
+  stripeCustomerId String?
+  status           String       @default("active")
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model Contact {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  email          String?
+  phone          String?
+  tags           String[]     @default([])
+  pipelineStage  String       @default("LEAD")
+  notes          String?
+  segments       Segment[]    @relation("ContactSegments")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Campaign {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  type           MessageChannel
+  status         String       @default("DRAFT")
+  workflow       Json?        // Stores the trigger/action visual builder data
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Message {
+  id             String         @id @default(uuid())
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  direction      MessageDirection @default(OUTBOUND)
+  channel        MessageChannel
+  status         MessageStatus  @default(PENDING)
+  to             String
+  content        String
+  sid            String?        // External provider ID (Twilio/WhatsApp)
+  threadId       String?        // Groups messages for the unified inbox
+  assigneeId     String?        // User assigned to this message thread
+  assignee       User?          @relation("MessageAssignee", fields: [assigneeId], references: [id])
+  internalNote   String?        // Team notes
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model ApiKey {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  key            String       @unique
+  name           String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Template {
+  id             String         @id @default(uuid())
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  name           String
+  content        String
+  channel        MessageChannel
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  userId         String?
+  action         String
+  entityType     String
+  entityId       String?
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+}
+
+model Integration {
+  id             String            @id @default(uuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  type           IntegrationType
+  status         IntegrationStatus @default(PENDING)
+  credentials    Json?             // Encrypted API keys or tokens
+  lastError      String?           // For health monitoring
+  healthStatus   IntegrationStatus?
+  lastStatusCheck DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  socialPosts    SocialPost[]
+
+  @@unique([organizationId, type])
+}
+
+model Notification {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  title          String
+  message        String
+  read           Boolean      @default(false)
+  type           String       @default("INFO") // INFO, ERROR, WARNING, SUCCESS
+  createdAt      DateTime     @default(now())
+}
+
+model Segment {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  description    String?
+  filters        Json         // Rules mapping to contact attributes/tags
+  contacts       Contact[]    @relation("ContactSegments")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model MediaAsset {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  type           MediaType
+  url            String
+  name           String
+  size           Int
+  folder         String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  posts          SocialPostMedia[]
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  FAILED
+}
+
+model SocialPost {
+  id             String         @id @default(uuid())
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  integrationId  String
+  integration    Integration    @relation(fields: [integrationId], references: [id])
+  caption        String?
+  platforms      SocialPlatform[]  @default([INSTAGRAM])
+  status         PostStatus     @default(DRAFT)
+  scheduledFor   DateTime?
+  publishedAt    DateTime?
+  externalPostId String?
+  metrics        Json?
+  errorMessage   String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  mediaAssets    SocialPostMedia[]
+}
+
+model SocialPostMedia {
+  id             String     @id @default(uuid())
+  socialPostId   String
+  socialPost     SocialPost @relation(fields: [socialPostId], references: [id], onDelete: Cascade)
+  mediaAssetId   String
+  mediaAsset     MediaAsset @relation(fields: [mediaAssetId], references: [id])
+  orderIndex     Int        @default(0) // The order of the media in a carousel/post
+  createdAt      DateTime   @default(now())
+
+  @@unique([socialPostId, mediaAssetId])
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  TWITTER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+}
+
+model ServiceSubscription {
+  id               String       @id @default(uuid())
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  planId           String
+  status           SubscriptionStatus @default(ACTIVE)
+  currentPeriodEnd DateTime
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@unique([organizationId, planId])
+}
+
+model TrialSubscription {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  serviceName    String
+  expiresAt      DateTime
+  isConverted    Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([organizationId, serviceName])
+}
+
+model AutomationTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  workflow    Json     // The visual builder JSON data representing the trigger/action sequence
+  category    String   // Marketing, Sales, Onboarding, e-commerce, etc
+  tags        String[] @default([])
+  isSystem    Boolean  @default(true) // True for pre-made templates provided by AutoFlow AI
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ConnectedAccount {
+  id             String            @id @default(uuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  platform       IntegrationType
+  accountId      String            // External account ID (e.g., FB Page ID, IG Account ID)
+  accountName    String?           // Display name (e.g., "Main FB Page")
+  accountHandle  String?           // @username or handle
+  accessToken    String?           // Encrypted OAuth access token
+  refreshToken   String?           // Encrypted OAuth refresh token
+  expiresAt      DateTime?         // Token expiration
+  status         IntegrationStatus @default(CONNECTED)
+  metadata       Json?             // Platform specific settings/config
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  automationRules AutomationRule[]
+  aiAgent        AIAgent?
+
+  @@unique([organizationId, platform, accountId])
+}
+
+// ═══════════════════════════════════════════════════
+// Unified Social Automation Platform Models
+// ═══════════════════════════════════════════════════
+
+model AutomationRule {
+  id                 String              @id @default(uuid())
+  organizationId     String
+  organization       Organization        @relation(fields: [organizationId], references: [id])
+  connectedAccountId String?
+  connectedAccount   ConnectedAccount?   @relation(fields: [connectedAccountId], references: [id])
+  platform           ServiceType
+  ruleType           AutomationRuleType
+  enabled            Boolean             @default(false)
+  config             Json?               // Custom responses, templates, triggers
+  stats              Json?               // Execution count, last run, success rate
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@unique([organizationId, platform, ruleType])
+}
+
+model AIAgent {
+  id                 String            @id @default(uuid())
+  organizationId     String
+  organization       Organization      @relation(fields: [organizationId], references: [id])
+  connectedAccountId String?           @unique
+  connectedAccount   ConnectedAccount? @relation(fields: [connectedAccountId], references: [id])
+  platform           ServiceType
+  status             AIAgentStatus     @default(PAUSED)
+  config             Json?             // AI model preferences, tone, language
+  analysisResults    Json?             // Bio, post patterns, audience analysis
+  recommendations    Json?             // Suggested automations, posting times
+  lastAnalyzedAt     DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@unique([organizationId, platform])
+}
+
+model AccountAnalytics {
+  id               String       @id @default(uuid())
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  platform         ServiceType
+  followersCount   Int          @default(0)
+  followingCount   Int          @default(0)
+  postsCount       Int          @default(0)
+  engagementRate   Float        @default(0)
+  responseRate     Float        @default(0)
+  bestPostingTimes Json?        // Array of optimal times
+  hashtagStrategy  Json?        // Top performing hashtags
+  contentSuggestions Json?      // AI-generated content ideas
+  metrics          Json?        // Platform-specific raw metrics
+  snapshotDate     DateTime     @default(now())
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([organizationId, platform, snapshotDate])
+}
+
+model PlatformSubscription {
+  id               String       @id @default(uuid())
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  serviceType      ServiceType
+  active           Boolean      @default(false)
+  tier             PlanTier     @default(FREE)
+  priceMonthly     Float        @default(0)
+  features         Json?        // Enabled feature flags for this tier
+  billingCycleEnd  DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@unique([organizationId, serviceType])
+}
