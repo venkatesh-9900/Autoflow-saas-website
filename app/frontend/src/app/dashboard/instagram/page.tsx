@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import {
     AtSign, Search, Filter,
     MoreHorizontal, Sparkles
 } from "lucide-react";
+import { InstagramAgent } from "@/components/instagram-agent";
 
 export default function InstagramDashboard() {
     return (
@@ -18,12 +20,16 @@ export default function InstagramDashboard() {
                     <p className="text-muted-foreground font-medium">Automate DMs, story replies, and comment engagements.</p>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="rounded-xl font-bold bg-background/50 border-border/60">
-                        View Analytics
-                    </Button>
-                    <Button className="rounded-xl font-bold shadow-lg shadow-primary/20 bg-gradient-to-r from-instagram to-pink-500 hover:opacity-90 transition-opacity">
-                        <Instagram className="w-4 h-4 mr-2" /> Connect Account
-                    </Button>
+                    <Link href="/dashboard/monitoring">
+                        <Button variant="outline" className="rounded-xl font-bold bg-background/50 border-border/60">
+                            View Analytics
+                        </Button>
+                    </Link>
+                    <Link href="/dashboard/integrations">
+                        <Button className="rounded-xl font-bold shadow-lg shadow-primary/20 bg-gradient-to-r from-instagram to-pink-500 hover:opacity-90 transition-opacity">
+                            <Instagram className="w-4 h-4 mr-2" /> Connect Account
+                        </Button>
+                    </Link>
                 </div>
             </div>
 
@@ -102,7 +108,9 @@ export default function InstagramDashboard() {
                         </div>
                         <h3 className="font-bold text-lg mb-2">Keyword Automation</h3>
                         <p className="text-sm text-muted-foreground font-medium mb-6 px-4">Create triggers that automatically respond when users use specific words in DMs or comments.</p>
-                        <Button variant="outline" className="rounded-xl font-bold w-full">Create Trigger</Button>
+                        <Link href="/dashboard/builder" className="w-full">
+                            <Button variant="outline" className="rounded-xl font-bold w-full">Create Trigger</Button>
+                        </Link>
                     </Card>
 
                     <Card className="border-border/60 shadow-sm rounded-2xl p-6 bg-gradient-to-br from-instagram/10 to-transparent">
@@ -114,6 +122,9 @@ export default function InstagramDashboard() {
                     </Card>
                 </div>
             </div>
+
+            {/* Dedicated In-Page Instagram AI Agent Section (Bottom of Page) & Floating Launcher */}
+            <InstagramAgent />
         </div>
     );
 }
@@ -135,7 +146,7 @@ function StatCard({ title, value, change, icon }: { title: string, value: string
 
 function InteractionItem({ user, avatar, msg, time, status }: { user: string, avatar: string, msg: string, time: string, status: string }) {
     return (
-        <div className="p-6 flex items-center gap-4 hover:bg-secondary/10 transition-colors cursor-pointer group">
+        <Link href="/dashboard/inbox" className="p-6 flex items-center gap-4 hover:bg-secondary/10 transition-colors cursor-pointer group block">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-instagram/20 to-pink-500/20 flex items-center justify-center font-black text-instagram">
                 {avatar}
             </div>
@@ -154,6 +165,6 @@ function InteractionItem({ user, avatar, msg, time, status }: { user: string, av
                     <MoreHorizontal className="w-4 h-4" />
                 </Button>
             </div>
-        </div>
+        </Link>
     );
 }

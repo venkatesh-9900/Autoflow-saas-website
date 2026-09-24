@@ -35,7 +35,7 @@ const platformStatuses = [
     { name: "WhatsApp", icon: MessageSquare, color: "text-whatsapp", bg: "bg-[#25D366]/10", href: "/dashboard/whatsapp" },
     { name: "Email", icon: Mail, color: "text-email", bg: "bg-[#EA4335]/10", href: "/dashboard/email" },
     { name: "SMS", icon: Smartphone, color: "text-sms", bg: "bg-[#A855F7]/10", href: "/dashboard/subscriptions" },
-    { name: "AI Chatbot", icon: Bot, color: "text-chatbot", bg: "bg-[#0EA5E9]/10", href: "/dashboard/subscriptions" },
+    { name: "AI Chatbot", icon: Bot, color: "text-chatbot", bg: "bg-[#0EA5E9]/10", href: "/dashboard/chatbot" },
 ];
 
 export default function DashboardOverview() {
