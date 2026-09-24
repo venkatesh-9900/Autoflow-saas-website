@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Mail, Smartphone, MessageSquare, Edit2, Copy, Trash2 } from "lucide-react";
+import { Plus, Mail, Smartphone, MessageSquare, Edit2, Copy, Trash2, MessageSquareText } from "lucide-react";
+import Link from "next/link";
 
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api-client";
@@ -107,6 +108,18 @@ export default function MessagesPage() {
                         }} />
                     </DialogContent>
                 </Dialog>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/20 text-sm">
+                <div className="flex items-center gap-3">
+                    <MessageSquareText className="w-5 h-5 text-primary shrink-0" />
+                    <span>Looking for real-time customer conversations across WhatsApp, Instagram & Email?</span>
+                </div>
+                <Link href="/dashboard/inbox">
+                    <Button variant="outline" size="sm" className="rounded-xl border-primary/30 text-primary hover:bg-primary/10 font-semibold shrink-0">
+                        Open Unified Inbox
+                    </Button>
+                </Link>
             </div>
 
             <Tabs defaultValue="templates" onValueChange={setActiveTab} className="w-full">

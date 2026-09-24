@@ -14,6 +14,8 @@ import {
     Mail,
     Smartphone,
     CreditCard,
+    PanelLeftClose,
+    PanelLeftOpen,
 } from "lucide-react";
 import {
     Sidebar,
@@ -26,9 +28,13 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarRail,
+    useSidebar,
 } from "@/components/ui/sidebar"
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 const mainNav = [
     { title: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -61,92 +67,167 @@ const platformNav = [
 
 
 export function AppSidebar() {
+    const { state, toggleSidebar } = useSidebar();
+    const isCollapsed = state === "collapsed";
+    const pathname = usePathname();
+
+    const isItemActive = (href: string) => {
+        if (!pathname) return false;
+        if (href === "/dashboard") {
+            return pathname === "/dashboard";
+        }
+        return pathname === href || pathname.startsWith(href + "/");
+    };
+
     return (
-        <Sidebar>
-            <SidebarHeader className="h-16 flex items-center px-6 border-b border-sidebar-border">
-                <Link href="/dashboard" className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                        <MessageSquare className="w-4 h-4 text-primary-foreground" />
-                    </div>
-                    <span className="font-semibold text-lg tracking-tight">AutoFlow</span>
-                </Link>
+        <Sidebar collapsible="icon">
+            <SidebarHeader className="h-16 flex flex-row items-center justify-between px-4 border-b border-sidebar-border shrink-0 group-data-[state=collapsed]:p-2">
+                <div className="flex items-center gap-2 group-data-[state=collapsed]:hidden">
+                    <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+                            <MessageSquare className="w-4 h-4 text-primary-foreground" />
+                        </div>
+                        <span className="font-semibold text-lg tracking-tight">AutoFlow</span>
+                    </Link>
+                    {/* Pulsing Green status indicator beside the text */}
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse ml-1 shrink-0" />
+                </div>
+                
+                {/* Premium Gemini-style collapse trigger */}
+                <div className="group-data-[state=collapsed]:w-full group-data-[state=collapsed]:flex group-data-[state=collapsed]:flex-col group-data-[state=collapsed]:px-3">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <SidebarMenuButton
+                                onClick={toggleSidebar}
+                                className="w-9 h-9 rounded-full bg-background border border-sidebar-border shadow-sm hover:bg-muted hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center shrink-0 cursor-pointer"
+                            >
+                                {isCollapsed ? (
+                                    <PanelLeftOpen className="w-4 h-4 text-sidebar-foreground/70" />
+                                ) : (
+                                    <PanelLeftClose className="w-4 h-4 text-sidebar-foreground/70" />
+                                )}
+                                <span className="sr-only">Toggle Sidebar</span>
+                            </SidebarMenuButton>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" align="center" sideOffset={10}>
+                            {isCollapsed ? "Open sidebar" : "Close sidebar"}
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent className="gap-6 py-4">
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mt-6 mb-2 px-6">Overview</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mt-2 mb-2 px-6">Overview</SidebarGroupLabel>
                     <SidebarGroupContent>
-                        <SidebarMenu className="px-3 gap-1">
-                            {mainNav.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild tooltip={item.title} className="hover:bg-sidebar-accent/50 transition-colors h-11 px-3 rounded-xl">
-                                        <Link href={item.href}>
-                                            <item.icon className="w-5 h-5 text-sidebar-foreground/70" />
-                                            <span className="font-semibold">{item.title}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                        <SidebarMenu className="px-3 gap-2">
+                            {mainNav.map((item) => {
+                                const active = isItemActive(item.href);
+                                return (
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            isActive={active}
+                                            tooltip={item.title}
+                                            className={`h-11 px-3 rounded-xl transition-all ${
+                                                active
+                                                    ? "bg-primary/10 text-primary font-bold shadow-xs hover:bg-primary/15"
+                                                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                                            }`}
+                                        >
+                                            <Link href={item.href}>
+                                                <item.icon className={`w-5 h-5 ${active ? "text-primary" : "text-sidebar-foreground/70"}`} />
+                                                <span className="font-semibold">{item.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                );
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
 
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mt-6 mb-2 px-6">Omnichannel</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mt-2 mb-2 px-6">Omnichannel</SidebarGroupLabel>
                     <SidebarGroupContent>
-                        <SidebarMenu className="px-3 gap-1">
-                            {channelNav.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild tooltip={item.title} className="hover:bg-sidebar-accent/50 transition-colors h-11 px-3 rounded-xl">
-                                        <Link href={item.href}>
-                                            <item.icon className={`w-5 h-5 ${item.color || 'text-sidebar-foreground/70'}`} />
-                                            <span className="font-semibold">{item.title}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                        <SidebarMenu className="px-3 gap-2">
+                            {channelNav.map((item) => {
+                                const active = isItemActive(item.href);
+                                return (
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            isActive={active}
+                                            tooltip={item.title}
+                                            className={`h-11 px-3 rounded-xl transition-all ${
+                                                active
+                                                    ? "bg-primary/10 text-primary font-bold shadow-xs hover:bg-primary/15"
+                                                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                                            }`}
+                                        >
+                                            <Link href={item.href}>
+                                                <item.icon className={`w-5 h-5 ${active ? "text-primary" : (item.color || 'text-sidebar-foreground/70')}`} />
+                                                <span className="font-semibold">{item.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                );
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
 
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mt-6 mb-2 px-6">Platforms</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mt-2 mb-2 px-6">Platforms</SidebarGroupLabel>
                     <SidebarGroupContent>
-                        <SidebarMenu className="px-3 gap-1">
-                            {platformNav.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild tooltip={item.title} className="hover:bg-sidebar-accent/50 transition-colors h-11 px-3 rounded-xl">
-                                        <Link href={item.href}>
-                                            <item.icon className={`w-5 h-5 ${item.color || 'text-sidebar-foreground/70'}`} />
-                                            <span className="font-semibold">{item.title}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                        <SidebarMenu className="px-3 gap-2">
+                            {platformNav.map((item) => {
+                                const active = isItemActive(item.href);
+                                return (
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            isActive={active}
+                                            tooltip={item.title}
+                                            className={`h-11 px-3 rounded-xl transition-all ${
+                                                active
+                                                    ? "bg-primary/10 text-primary font-bold shadow-xs hover:bg-primary/15"
+                                                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                                            }`}
+                                        >
+                                            <Link href={item.href}>
+                                                <item.icon className={`w-5 h-5 ${active ? "text-primary" : (item.color || 'text-sidebar-foreground/70')}`} />
+                                                <span className="font-semibold">{item.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                );
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
 
-            <SidebarFooter className="border-t border-sidebar-border p-4">
+            <SidebarFooter className="border-t border-sidebar-border p-4 group-data-[state=collapsed]:p-2 shrink-0">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild className="h-12 hover:bg-sidebar-accent/50 transition-colors px-2">
+                        <SidebarMenuButton asChild tooltip="Admin User" className="h-12 hover:bg-sidebar-accent/50 transition-colors px-2">
                             <Link href="/dashboard/settings" className="flex items-center gap-3">
-                                <Avatar className="w-8 h-8 rounded-md border border-border">
+                                <Avatar className="w-8 h-8 rounded-md border border-border shrink-0">
                                     <AvatarImage src="https://github.com/shadcn.png" />
                                     <AvatarFallback>AD</AvatarFallback>
                                 </Avatar>
-                                <div className="flex flex-col flex-1 overflow-hidden">
+                                <div className="flex flex-col flex-1 overflow-hidden group-data-[state=collapsed]:hidden">
                                     <span className="text-sm font-medium truncate">Admin User</span>
                                     <span className="text-xs text-muted-foreground truncate">admin@company.com</span>
                                 </div>
-                                <Settings className="w-4 h-4 text-muted-foreground ml-auto" />
+                                <Settings className="w-4 h-4 text-muted-foreground ml-auto group-data-[state=collapsed]:hidden" />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
+            <SidebarRail />
         </Sidebar>
     )
 }

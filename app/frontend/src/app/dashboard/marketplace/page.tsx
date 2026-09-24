@@ -82,25 +82,30 @@ export default function TemplateMarketplace() {
                     <h1 className="text-5xl font-black tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Marketplace</h1>
                     <p className="text-muted-foreground text-xl font-medium">Discover ready-made AI agents and automation templates.</p>
                 </div>
-                <div className="flex gap-4 items-center">
-                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as Category)} className="h-14">
+                <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as Category)} className="h-14 shrink-0">
                         <TabsList className="h-full rounded-[1.5rem] bg-secondary/30 p-1">
                             <TabsTrigger value="Templates" className="rounded-2xl h-full px-6 text-sm font-bold data-[state=active]:bg-background data-[state=active]:shadow-sm">Templates</TabsTrigger>
                             <TabsTrigger value="AI Agents" className="rounded-2xl h-full px-6 text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">AI Agents</TabsTrigger>
                         </TabsList>
                     </Tabs>
-                    <div className="relative hidden xl:block">
+                    <div className="relative flex-1 sm:w-72">
                         <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
                         <Input
-                            className="bg-secondary/20 border-border/60 pl-12 rounded-[1.5rem] h-14 w-80 text-base focus:ring-primary/20 transition-all font-medium"
+                            className="bg-secondary/20 border-border/60 pl-12 pr-12 rounded-[1.5rem] h-14 w-full text-base focus:ring-primary/20 transition-all font-medium"
                             placeholder={`Search ${activeTab.toLowerCase()}...`}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm("")}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground font-semibold"
+                            >
+                                Clear
+                            </button>
+                        )}
                     </div>
-                    <Button size="icon" variant="outline" className="rounded-[1.5rem] h-14 w-14 border-border/60">
-                        <Filter className="w-5 h-5" />
-                    </Button>
                 </div>
             </div>
 
